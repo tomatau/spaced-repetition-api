@@ -6,7 +6,8 @@ const authRouter = express.Router()
 const jsonBodyParser = express.json()
 
 authRouter
-  .post('/token', jsonBodyParser, async (req, res, next) => {
+  .route('/token')
+  .post(jsonBodyParser, async (req, res, next) => {
     const { username, password } = req.body
     const loginUser = { username, password }
 
@@ -50,15 +51,15 @@ authRouter
     }
   })
 
-authRouter.patch('/token', requireAuth, (req, res) => {
-  const sub = req.user.username
-  const payload = {
-    user_id: req.user.id,
-    name: req.user.name,
-  }
-  res.send({
-    authToken: AuthService.createJwt(sub, payload),
+  .put(requireAuth, (req, res) => {
+    const sub = req.user.username
+    const payload = {
+      user_id: req.user.id,
+      name: req.user.name,
+    }
+    res.send({
+      authToken: AuthService.createJwt(sub, payload),
+    })
   })
-})
 
 module.exports = authRouter

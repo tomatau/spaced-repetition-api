@@ -105,7 +105,7 @@ describe('Auth Endpoints', function () {
         }
       )
       return supertest(app)
-        .patch('/api/auth/token')
+        .put('/api/auth/token')
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .expect(200, {
           authToken: expectedToken,
