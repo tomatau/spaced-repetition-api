@@ -5,6 +5,7 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 const errorHandler = require('./middleware/error-handler')
 const authRouter = require('./auth/auth-router')
+const listRouter = require('./list/list-router')
 
 const app = express()
 
@@ -15,6 +16,7 @@ app.use(cors())
 app.use(helmet())
 
 app.use('/api/auth', authRouter)
+app.use('/api/list', listRouter)
 
 app.use(errorHandler)
 
