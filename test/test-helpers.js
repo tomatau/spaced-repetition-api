@@ -35,9 +35,23 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
 }
 
 function cleanTables(db) {
-  return db.raw(
-    `TRUNCATE
-      "user"`
+  return db.transaction(trx =>
+    trx.raw(
+      `TRUNCATE
+        "word",
+        "list",
+        "user"`
+      )
+      .then(() =>
+        Promise.all([
+          trx.raw(`ALTER SEQUENCE word_id_seq minvalue 0 START WITH 1`),
+          trx.raw(`ALTER SEQUENCE list_id_seq minvalue 0 START WITH 1`),
+          trx.raw(`ALTER SEQUENCE user_id_seq minvalue 0 START WITH 1`),
+          trx.raw(`SELECT setval('word_id_seq', 0)`),
+          trx.raw(`SELECT setval('list_id_seq', 0)`),
+          trx.raw(`SELECT setval('user_id_seq', 0)`),
+        ])
+      )
   )
 }
 
@@ -46,9 +60,14 @@ function seedUsers(db, users) {
     ...user,
     password: bcrypt.hashSync(user.password, 1)
   }))
-  return db
-    .into('user')
-    .insert(preppedUsers)
+  return db.transaction(trx =>
+    trx
+      .into('user')
+      .insert(preppedUsers)
+      .then(() =>
+        trx.raw(`SELECT setval('user_id_seq', 2)`)
+      )
+  )
 }
 
 module.exports = {

@@ -49,22 +49,6 @@ listRouter
   })
 
 listRouter
-  .route('/:list_id')
-  .get(async (req, res, next) => {
-    try {
-      const { list } = req
-      const words = await ListService.getListWords(
-        req.app.get('db'),
-        req.params.list_id,
-      )
-
-      res.json(ListService.populateLinkedList(list, words))
-    } catch (error) {
-      next(error)
-    }
-  })
-
-listRouter
   .route('/:list_id/head')
   .get(async (req, res, next) => {
     try {

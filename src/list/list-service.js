@@ -22,16 +22,7 @@ const ListService = {
         'list.user_id',
         'list.head',
         'list.score',
-        // db.raw(
-        //   `COALESCE(
-        //     json_agg(DISTINCT word)
-        //     filter(WHERE word.id IS NOT NULL),
-        //     '[]'
-        //   ) AS words`
-        // ),
       )
-      // .leftJoin('word', 'word.list_id', 'list.id')
-      // .groupBy('list.id')
       .where('list.id', list_id)
       .first()
   },
