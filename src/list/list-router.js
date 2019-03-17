@@ -72,6 +72,12 @@ listRouter
     try {
       const { guess } = req.body
       const { list } = req
+
+      if (!guess)
+        return res.status(400).json({
+          error: `Missing 'guess' in request body`
+        })
+
       const words = await ListService.getListWords(
         req.app.get('db'),
         req.params.list_id

@@ -19,6 +19,9 @@ describe('Auth Endpoints', function () {
 
   afterEach('cleanup', () => helpers.cleanTables(db))
 
+  /**
+   * @description Get token for login
+   **/
   describe(`POST /api/auth/token`, () => {
     beforeEach('insert users', () =>
       helpers.seedUsers(
@@ -86,6 +89,9 @@ describe('Auth Endpoints', function () {
     })
   })
 
+  /**
+   * @description Refresh token
+   **/
   describe(`PATCH /api/auth/token`, () => {
     beforeEach('insert users', () =>
       helpers.seedUsers(

@@ -19,6 +19,9 @@ describe('User Endpoints', function () {
 
   afterEach('cleanup', () => helpers.cleanTables(db))
 
+  /**
+   * @description Register a user and populate their fields
+   **/
   describe(`POST /api/user`, () => {
     beforeEach('insert users', () => helpers.seedUsers(db, testUsers))
 
