@@ -2,6 +2,10 @@ const knex = require('knex')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
+/**
+ * create a knex instance connected to postgres
+ * @returns {knex instance}
+ */
 function makeKnexInstance() {
   return knex({
     client: 'pg',
@@ -9,6 +13,10 @@ function makeKnexInstance() {
   })
 }
 
+/**
+ * create a knex instance connected to postgres
+ * @returns {array} of user objects
+ */
 function makeUsersArray() {
   return [
     {
@@ -28,7 +36,8 @@ function makeUsersArray() {
 
 /**
  * generate fixtures of lists and words for a given user
- * @param {user object} user
+ * @param {object} user - contains `id` property
+ * @returns {Array(lists, words)} - arrays of lists and words
  */
 function makeListsAndWords(user) {
   const lists = [
@@ -123,8 +132,9 @@ function makeListsAndWords(user) {
 
 /**
  * make a bearer token with jwt for authorization header
- * @param {user object} user
- * @param {jwt secret} secret
+ * @param {object} user - contains `id`, `username`
+ * @param {string} secret - used to create the JWT
+ * @returns {string} - for HTTP authorization header
  */
 function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
   const token = jwt.sign({ user_id: user.id }, secret, {
@@ -137,6 +147,7 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
 /**
  * remove data from tables and reset sequences for SERIAL id fields
  * @param {knex instance} db
+ * @returns {Promise} - when tables are cleared
  */
 function cleanTables(db) {
   return db.transaction(trx =>
@@ -162,7 +173,8 @@ function cleanTables(db) {
 /**
  * insert users into db with bcrypted passwords and update sequence
  * @param {knex instance} db
- * @param {users array} users
+ * @param {array} users - array of user objects for insertion
+ * @returns {Promise} - when users table seeded
  */
 function seedUsers(db, users) {
   const preppedUsers = users.map(user => ({
@@ -179,9 +191,10 @@ function seedUsers(db, users) {
 /**
  * seed the databases with words and update sequence counter
  * @param {knex instance} db
- * @param {array of users} users
- * @param {array of lists} lists
- * @param {array of words} words
+ * @param {array} users - array of user objects for insertion
+ * @param {array} lists - array of lists objects for insertion
+ * @param {array} words - array of words objects for insertion
+ * @returns {Promise} - when all tables seeded
  */
 async function seedUsersListsWords(db, users, lists, words) {
   await seedUsers(db, users)
