@@ -1,17 +1,5 @@
 # Spaced repetition API!
 
-## Scripts
-
-Start the application `npm start`
-
-Start nodemon for the application `npm run dev`
-
-Run the tests mode `npm test`
-
-Run the migrations up `npm run migrate`
-
-Run the migrations down `npm run migrate -- 0`
-
 ## Local dev setup
 
 If using user `dunder-mifflin`:
@@ -49,3 +37,15 @@ datestyle = 'iso, mdy'
 timezone = 'UTC'
 #timezone_abbreviations = 'Default'     # Select the set of available time zone
 ```
+
+## Scripts
+
+Start the application `npm start`
+
+Start nodemon for the application `npm run dev`
+
+Run the tests mode `npm test`
+
+Run the migrations up `npm run migrate`
+
+Run the migrations down `npm run migrate -- 0`
