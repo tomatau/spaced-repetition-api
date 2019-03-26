@@ -43,62 +43,36 @@ const UserService = {
   },
   populateUserWords(db, user_id) {
     return db.transaction(async trx => {
-      const [l33tListId, frenchListId] = await trx
-        .into('list')
+      const [frenchListId] = await trx
+        .into('language')
         .insert([
-          { name: 'l337$p34k', user_id },
           { name: 'French', user_id },
         ], ['id'])
 
       // when inserting words,
       // we need to know the current sequence number
-      // so that we can set the `next` field of the linked list
+      // so that we can set the `next` field of the linked language
       const seq = await db
         .from('word_id_seq')
         .select('last_value')
         .first()
 
-      const l33tListWords = [
-        ['1337', 'leet', 2],
-        ['h3110', 'hello', 3],
-        ['c001', 'cool', 4],
-        ['7r4n$l473', 'translate', 5],
-        ['w3rd', 'word', 6],
-        ['4m4z1n5', 'amazing', 7],
-        ['d0g', 'dog', 8],
-        ['c47', 'cat', null],
-      ]
-
       const frenchListWords = [
-        ['entraine toi', 'practice', 10],
-        ['bonjour', 'hello', 11],
-        ['maison', 'house', 12],
-        ['développeur', 'developer', 13],
-        ['traduire', 'translate', 14],
-        ['incroyable', 'amazing', 15],
-        ['chien', 'dog', 16],
+        ['entraine toi', 'practice', 2],
+        ['bonjour', 'hello', 3],
+        ['maison', 'house', 4],
+        ['développeur', 'developer', 5],
+        ['traduire', 'translate', 6],
+        ['incroyable', 'amazing', 7],
+        ['chien', 'dog', 8],
         ['chat', 'cat', null],
       ]
-
-      const [l33tHeadId] = await trx
-        .into('word')
-        .insert(
-          l33tListWords.map(([original, translation, nextInc]) => ({
-            list_id: l33tListId.id,
-            original,
-            translation,
-            next: nextInc
-              ? Number(seq.last_value) + nextInc
-              : null
-          })),
-          ['id']
-        )
 
       const [frenchHeadId] = await trx
         .into('word')
         .insert(
           frenchListWords.map(([original, translation, nextInc]) => ({
-            list_id: frenchListId.id,
+            language_id: frenchListId.id,
             original,
             translation,
             next: nextInc
@@ -108,18 +82,11 @@ const UserService = {
           ['id']
         )
 
-      await Promise.all([
-        trx('list')
-          .where('id', l33tListId.id)
-          .update({
-            head: l33tHeadId.id,
-          }),
-        trx('list')
-          .where('id', frenchListId.id)
-          .update({
-            head: frenchHeadId.id,
-          }),
-      ])
+      await trx('language')
+        .where('id', frenchListId.id)
+        .update({
+          head: frenchHeadId.id,
+        })
     })
   },
 }

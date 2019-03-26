@@ -3,12 +3,12 @@ CREATE TABLE "word" (
   "original" TEXT NOT NULL,
   "translation" TEXT NOT NULL,
   "memory_value" SMALLINT DEFAULT 1,
-  "list_id" INTEGER REFERENCES "list"(id)
+  "language_id" INTEGER REFERENCES "language"(id)
     ON DELETE CASCADE NOT NULL,
   "next" INTEGER REFERENCES "word"(id)
     ON DELETE SET NULL
 );
 
-ALTER TABLE "list"
+ALTER TABLE "language"
   ADD COLUMN "head" INTEGER REFERENCES "word"(id)
     ON DELETE SET NULL;

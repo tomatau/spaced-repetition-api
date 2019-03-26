@@ -35,20 +35,20 @@ function makeUsersArray() {
 }
 
 /**
- * generate fixtures of lists and words for a given user
+ * generate fixtures of languages and words for a given user
  * @param {object} user - contains `id` property
- * @returns {Array(lists, words)} - arrays of lists and words
+ * @returns {Array(languages, words)} - arrays of languages and words
  */
-function makeListsAndWords(user) {
-  const lists = [
+function makeLanguagesAndWords(user) {
+  const languages = [
     {
       id: 1,
-      name: 'Test list 1',
+      name: 'Test language 1',
       user_id: user.id,
     },
     {
       id: 2,
-      name: 'Test list 2',
+      name: 'Test language 2',
       user_id: user.id,
     },
   ]
@@ -58,76 +58,76 @@ function makeListsAndWords(user) {
       id: 1,
       original: 'original 1',
       translation: 'translation 1',
-      list_id: 1,
+      language_id: 1,
       next: 2,
     },
     {
       id: 2,
       original: 'original 2',
       translation: 'translation 2',
-      list_id: 1,
+      language_id: 1,
       next: 3,
     },
     {
       id: 3,
       original: 'original 3',
       translation: 'translation 3',
-      list_id: 1,
+      language_id: 1,
       next: 4,
     },
     {
       id: 4,
       original: 'original 4',
       translation: 'translation 4',
-      list_id: 1,
+      language_id: 1,
       next: 5,
     },
     {
       id: 5,
       original: 'original 5',
       translation: 'translation 5',
-      list_id: 1,
+      language_id: 1,
       next: null,
     },
-    // list 2
+    // language 2
     {
       id: 6,
       original: 'original 6',
       translation: 'translation 6',
-      list_id: 2,
+      language_id: 2,
       next: 7,
     },
     {
       id: 7,
       original: 'original 7',
       translation: 'translation 7',
-      list_id: 2,
+      language_id: 2,
       next: 8,
     },
     {
       id: 8,
       original: 'original 8',
       translation: 'translation 8',
-      list_id: 2,
+      language_id: 2,
       next: 9,
     },
     {
       id: 9,
       original: 'original 9',
       translation: 'translation 9',
-      list_id: 2,
+      language_id: 2,
       next: 10,
     },
     {
       id: 10,
       original: 'original 10',
       translation: 'translation 10',
-      list_id: 2,
+      language_id: 2,
       next: null,
     },
   ]
 
-  return [lists, words]
+  return [languages, words]
 }
 
 /**
@@ -154,16 +154,16 @@ function cleanTables(db) {
     trx.raw(
       `TRUNCATE
         "word",
-        "list",
+        "language",
         "user"`
       )
       .then(() =>
         Promise.all([
           trx.raw(`ALTER SEQUENCE word_id_seq minvalue 0 START WITH 1`),
-          trx.raw(`ALTER SEQUENCE list_id_seq minvalue 0 START WITH 1`),
+          trx.raw(`ALTER SEQUENCE language_id_seq minvalue 0 START WITH 1`),
           trx.raw(`ALTER SEQUENCE user_id_seq minvalue 0 START WITH 1`),
           trx.raw(`SELECT setval('word_id_seq', 0)`),
-          trx.raw(`SELECT setval('list_id_seq', 0)`),
+          trx.raw(`SELECT setval('language_id_seq', 0)`),
           trx.raw(`SELECT setval('user_id_seq', 0)`),
         ])
       )
@@ -192,27 +192,27 @@ function seedUsers(db, users) {
  * seed the databases with words and update sequence counter
  * @param {knex instance} db
  * @param {array} users - array of user objects for insertion
- * @param {array} lists - array of lists objects for insertion
+ * @param {array} languages - array of languages objects for insertion
  * @param {array} words - array of words objects for insertion
  * @returns {Promise} - when all tables seeded
  */
-async function seedUsersListsWords(db, users, lists, words) {
+async function seedUsersLanguagesWords(db, users, languages, words) {
   await seedUsers(db, users)
 
   await db.transaction(async trx => {
-    await trx.into('list').insert(lists)
+    await trx.into('language').insert(languages)
     await trx.into('word').insert(words)
 
-    const list1Head = words.find(w => w.list_id === lists[0].id)
-    const list2Head = words.find(w => w.list_id === lists[1].id)
+    const language1Head = words.find(w => w.language_id === languages[0].id)
+    const language2Head = words.find(w => w.language_id === languages[1].id)
 
     await Promise.all([
-      trx('list').update({ head: list1Head.id }).where('id', lists[0].id),
-      trx('list').update({ head: list2Head.id }).where('id', lists[1].id),
+      trx('language').update({ head: language1Head.id }).where('id', languages[0].id),
+      trx('language').update({ head: language2Head.id }).where('id', languages[1].id),
     ])
 
     await Promise.all([
-      trx.raw(`SELECT setval('list_id_seq', ?)`, [lists[lists.length - 1].id]),
+      trx.raw(`SELECT setval('language_id_seq', ?)`, [languages[languages.length - 1].id]),
       trx.raw(`SELECT setval('word_id_seq', ?)`, [words[words.length - 1].id]),
     ])
   })
@@ -221,9 +221,9 @@ async function seedUsersListsWords(db, users, lists, words) {
 module.exports = {
   makeKnexInstance,
   makeUsersArray,
-  makeListsAndWords,
+  makeLanguagesAndWords,
   makeAuthHeader,
   cleanTables,
   seedUsers,
-  seedUsersListsWords,
+  seedUsersLanguagesWords,
 }

@@ -1,4 +1,4 @@
-CREATE TABLE "list" (
+CREATE TABLE "language" (
   "id" SERIAL PRIMARY KEY,
   "name" TEXT NOT NULL,
   "score" SMALLINT DEFAULT 0,

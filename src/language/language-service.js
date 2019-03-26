@@ -1,71 +1,71 @@
 const { LinkedList } = require('./linked-list')
 
-const ListService = {
-  getUsersLists(db, user_id) {
+const LanguageService = {
+  getUsersLanguages(db, user_id) {
     return db
-      .from('list')
+      .from('language')
       .select(
-        'list.id',
-        'list.name',
-        'list.user_id',
-        'list.head',
-        'list.score',
+        'language.id',
+        'language.name',
+        'language.user_id',
+        'language.head',
+        'language.score',
       )
-      .where('list.user_id', user_id)
+      .where('language.user_id', user_id)
   },
-  getListById(db, list_id) {
+  getLanguageById(db, language_id) {
     return db
-      .from('list')
+      .from('language')
       .select(
-        'list.id',
-        'list.name',
-        'list.user_id',
-        'list.head',
-        'list.score',
+        'language.id',
+        'language.name',
+        'language.user_id',
+        'language.head',
+        'language.score',
       )
-      .where('list.id', list_id)
+      .where('language.id', language_id)
       .first()
   },
 
-  getListHead(db, list_id) {
+  getLanguageHead(db, language_id) {
     return db
       .from('word')
       .select(
         'word.id',
-        'word.list_id',
+        'word.language_id',
         'word.original',
         'word.translation',
         'word.next',
         'word.memory_value',
-        'list.score as list_score',
+        'language.score as language_score',
       )
-      .leftJoin('list', 'list.head', 'word.id')
-      .where('list.id', list_id)
+      .leftJoin('language', 'language.head', 'word.id')
+      .where('language.id', language_id)
       .first()
   },
 
-  getListWords(db, list_id) {
+  getLanguageWords(db, language_id) {
     return db
       .from('word')
       .select(
         'id',
-        'list_id',
+        'language_id',
         'original',
         'translation',
         'next',
         'memory_value',
       )
-      .where({ list_id })
+      .where({ language_id })
   },
 
-  populateLinkedList(list, words) {
+  populateLinkedList(language, words) {
     const ll = new LinkedList({
-      id: list.id,
-      name: list.name,
-      score: list.score,
+      id: language.id,
+      name: language.name,
+      score: language.score,
     })
 
-    let word = words.find(w => w.id === list.head)
+    let word = words.find(w => w.id === language.head)
 
     ll.insert({
       id: word.id,
@@ -88,17 +88,17 @@ const ListService = {
     return ll
   },
 
-  persistLinkedList(db, linkedList) {
+  persistLinkedList(db, linkedLanguage) {
     return db.transaction(trx => {
       Promise.all([
-        db('list')
+        db('language')
           .transacting(trx)
-          .where('id', linkedList.id)
+          .where('id', linkedLanguage.id)
           .update({
-            score: linkedList.score,
-            head: linkedList.head.value.id,
+            score: linkedLanguage.score,
+            head: linkedLanguage.head.value.id,
           }),
-        ...linkedList.map(node =>
+        ...linkedLanguage.map(node =>
           db('word')
             .transacting(trx)
             .where('id', node.value.id)
@@ -114,4 +114,4 @@ const ListService = {
   }
 }
 
-module.exports = ListService
+module.exports = LanguageService
