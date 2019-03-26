@@ -92,7 +92,7 @@ describe('Language Endpoints', function () {
             expect(res.body[idx]).to.have.property('id', usersLanguage.id)
             expect(res.body[idx]).to.have.property('name', usersLanguage.name)
             expect(res.body[idx]).to.have.property('user_id', usersLanguage.user_id)
-            expect(res.body[idx]).to.have.property('score', 0)
+            expect(res.body[idx]).to.have.property('total_score', 0)
             expect(res.body[idx]).to.have.property('head').which.is.not.null
           })
         })
@@ -122,7 +122,7 @@ describe('Language Endpoints', function () {
         .expect(200)
         .expect({
           nextWord: headWord.original,
-          languageScore: 0,
+          languageTotalScore: 0,
         })
     })
   })
@@ -170,7 +170,7 @@ describe('Language Endpoints', function () {
           .expect(200)
           .expect({
             nextWord: testLanguagesWords[1].original,
-            languageScore: 0,
+            languageTotalScore: 0,
             answer: testLanguagesWords[0].translation,
             isCorrect: false
           })
@@ -188,7 +188,7 @@ describe('Language Endpoints', function () {
           .send(incorrectPostBody)
           .expect({
             nextWord: testLanguagesWords[0].original,
-            languageScore: 0,
+            languageTotalScore: 0,
             answer: testLanguagesWords[1].translation,
             isCorrect: false
           })
@@ -209,7 +209,7 @@ describe('Language Endpoints', function () {
           .expect(200)
           .expect({
             nextWord: testLanguagesWords[1].original,
-            languageScore: 1,
+            languageTotalScore: 1,
             answer: testLanguagesWords[0].translation,
             isCorrect: true
           })
@@ -233,7 +233,7 @@ describe('Language Endpoints', function () {
           .send(correctPostBody)
           .expect({
             nextWord: testLanguagesWords[2].original,
-            languageScore: 2,
+            languageTotalScore: 2,
             answer: testLanguagesWords[1].translation,
             isCorrect: true
           })
@@ -247,7 +247,7 @@ describe('Language Endpoints', function () {
           .send(correctPostBody)
           .expect({
             nextWord: testLanguagesWords[0].original,
-            languageScore: 3,
+            languageTotalScore: 3,
             answer: testLanguagesWords[2].translation,
             isCorrect: true
           })

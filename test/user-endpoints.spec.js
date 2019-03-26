@@ -173,7 +173,7 @@ describe('User Endpoints', function () {
         }
         const expectedList = {
           name: 'French',
-          score: 0,
+          total_score: 0,
           words: [
             { original: 'entraine toi', translation: 'practice' },
             { original: 'bonjour', translation: 'hello' },
@@ -210,7 +210,7 @@ describe('User Endpoints', function () {
             expect(dbLists).to.have.length(1)
 
             expect(dbLists[0].name).to.eql(expectedList.name)
-            expect(dbLists[0].score).to.eql(0)
+            expect(dbLists[0].total_score).to.eql(0)
 
             const dbWords = dbLists[0].words
             expect(dbWords).to.have.length(

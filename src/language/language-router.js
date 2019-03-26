@@ -59,7 +59,7 @@ languageRouter
 
       res.json({
         nextWord: word.original,
-        languageScore: word.language_score,
+        languageTotalScore: word.language_total_score,
       })
     } catch (error) {
       next(error)
@@ -97,7 +97,7 @@ languageRouter
         linkedLanguage.head
           .value.memory_value = Number(node.value.memory_value) * 2
 
-        linkedLanguage.score = Number(linkedLanguage.score) + 1
+        linkedLanguage.total_score = Number(linkedLanguage.total_score) + 1
       } else {
         isCorrect = false
         linkedLanguage.head.value.memory_value = 1
@@ -112,7 +112,7 @@ languageRouter
 
       res.json({
         nextWord: linkedLanguage.head.value.original,
-        languageScore: linkedLanguage.score,
+        languageTotalScore: linkedLanguage.total_score,
         answer,
         isCorrect,
       })

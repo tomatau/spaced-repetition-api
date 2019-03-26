@@ -9,7 +9,7 @@ const LanguageService = {
         'language.name',
         'language.user_id',
         'language.head',
-        'language.score',
+        'language.total_score',
       )
       .where('language.user_id', user_id)
   },
@@ -21,7 +21,7 @@ const LanguageService = {
         'language.name',
         'language.user_id',
         'language.head',
-        'language.score',
+        'language.total_score',
       )
       .where('language.id', language_id)
       .first()
@@ -37,7 +37,7 @@ const LanguageService = {
         'word.translation',
         'word.next',
         'word.memory_value',
-        'language.score as language_score',
+        'language.total_score as language_total_score',
       )
       .leftJoin('language', 'language.head', 'word.id')
       .where('language.id', language_id)
@@ -62,7 +62,7 @@ const LanguageService = {
     const ll = new LinkedList({
       id: language.id,
       name: language.name,
-      score: language.score,
+      total_score: language.total_score,
     })
 
     let word = words.find(w => w.id === language.head)
@@ -95,7 +95,7 @@ const LanguageService = {
           .transacting(trx)
           .where('id', linkedLanguage.id)
           .update({
-            score: linkedLanguage.score,
+            total_score: linkedLanguage.total_score,
             head: linkedLanguage.head.value.id,
           }),
         ...linkedLanguage.map(node =>
