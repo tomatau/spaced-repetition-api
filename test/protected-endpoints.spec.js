@@ -35,13 +35,13 @@ describe('Protected Endpoints', function () {
       method: supertest(app).get,
     },
     {
-      name: 'GET /api/language/:language_id/head',
-      path: '/api/language/1',
+      name: 'GET /api/language/head',
+      path: '/api/language/head',
       method: supertest(app).get,
     },
     {
-      name: 'POST /api/language/:language_id/guess',
-      path: '/api/language/1/guess',
+      name: 'POST /api/language/guess',
+      path: '/api/language/guess',
       method: supertest(app).post,
     },
     {

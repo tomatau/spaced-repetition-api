@@ -46,11 +46,6 @@ function makeLanguagesAndWords(user) {
       name: 'Test language 1',
       user_id: user.id,
     },
-    {
-      id: 2,
-      name: 'Test language 2',
-      user_id: user.id,
-    },
   ]
 
   const words = [
@@ -87,42 +82,6 @@ function makeLanguagesAndWords(user) {
       original: 'original 5',
       translation: 'translation 5',
       language_id: 1,
-      next: null,
-    },
-    // language 2
-    {
-      id: 6,
-      original: 'original 6',
-      translation: 'translation 6',
-      language_id: 2,
-      next: 7,
-    },
-    {
-      id: 7,
-      original: 'original 7',
-      translation: 'translation 7',
-      language_id: 2,
-      next: 8,
-    },
-    {
-      id: 8,
-      original: 'original 8',
-      translation: 'translation 8',
-      language_id: 2,
-      next: 9,
-    },
-    {
-      id: 9,
-      original: 'original 9',
-      translation: 'translation 9',
-      language_id: 2,
-      next: 10,
-    },
-    {
-      id: 10,
-      original: 'original 10',
-      translation: 'translation 10',
-      language_id: 2,
       next: null,
     },
   ]
@@ -184,7 +143,10 @@ function seedUsers(db, users) {
   return db.transaction(async trx => {
     await trx.into('user').insert(preppedUsers)
 
-    await trx.raw(`SELECT setval('user_id_seq', ?)`, [users[users.length - 1].id])
+    await trx.raw(
+      `SELECT setval('user_id_seq', ?)`,
+      [users[users.length - 1].id],
+    )
   })
 }
 
@@ -203,17 +165,23 @@ async function seedUsersLanguagesWords(db, users, languages, words) {
     await trx.into('language').insert(languages)
     await trx.into('word').insert(words)
 
-    const language1Head = words.find(w => w.language_id === languages[0].id)
-    const language2Head = words.find(w => w.language_id === languages[1].id)
+    const language1Head = words.find(
+      w => w.language_id === languages[0].id
+    )
+
+    await trx('language')
+      .update({ head: language1Head.id })
+      .where('id', languages[0].id)
 
     await Promise.all([
-      trx('language').update({ head: language1Head.id }).where('id', languages[0].id),
-      trx('language').update({ head: language2Head.id }).where('id', languages[1].id),
-    ])
-
-    await Promise.all([
-      trx.raw(`SELECT setval('language_id_seq', ?)`, [languages[languages.length - 1].id]),
-      trx.raw(`SELECT setval('word_id_seq', ?)`, [words[words.length - 1].id]),
+      trx.raw(
+        `SELECT setval('language_id_seq', ?)`,
+        [languages[languages.length - 1].id],
+      ),
+      trx.raw(
+        `SELECT setval('word_id_seq', ?)`,
+        [words[words.length - 1].id],
+      ),
     ])
   })
 }

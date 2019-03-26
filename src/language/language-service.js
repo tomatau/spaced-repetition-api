@@ -1,7 +1,7 @@
 const { LinkedList } = require('./linked-list')
 
 const LanguageService = {
-  getUsersLanguages(db, user_id) {
+  getUsersLanguage(db, user_id) {
     return db
       .from('language')
       .select(
@@ -12,6 +12,7 @@ const LanguageService = {
         'language.total_score',
       )
       .where('language.user_id', user_id)
+      .first()
   },
 
   getLanguageById(db, language_id) {
@@ -94,7 +95,7 @@ const LanguageService = {
   },
 
   persistLinkedList(db, linkedLanguage) {
-    return db.transaction(trx => {
+    return db.transaction(trx =>
       Promise.all([
         db('language')
           .transacting(trx)
@@ -114,9 +115,7 @@ const LanguageService = {
             })
         )
       ])
-        .then(trx.commit)
-        .catch(trx.rollback)
-    })
+    )
   }
 }
 

@@ -25,21 +25,19 @@ describe('Language Endpoints', function () {
   describe(`Endpoints protected by user`, () => {
     const languageSpecificEndpoint = [
       {
-        title: `GET /api/language/:language_id/head`,
-        path: languageId => `/api/language/${languageId}/head`,
+        title: `GET /api/language/head`,
+        path: `/api/language/head`,
         method: supertest(app).get
       },
       {
-        title: `POST /api/language/:language_id/guess`,
-        path: languageId => `/api/language/${languageId}/guess`,
+        title: `POST /api/language/guess`,
+        path: `/api/language/guess`,
         method: supertest(app).post
       },
     ]
 
     languageSpecificEndpoint.forEach(endpoint => {
       describe(endpoint.title, () => {
-        const [testLanguage] = testLanguages
-
         beforeEach('insert users, languages and words', () => {
           return helpers.seedUsersLanguagesWords(
             db,
@@ -49,21 +47,12 @@ describe('Language Endpoints', function () {
           )
         })
 
-        it(`responds with 404 if language doesn't exist`, () => {
-          return endpoint.method(endpoint.path(123))
-            .set('Authorization', helpers.makeAuthHeader(testUser))
-            .send({})
-            .expect(404, {
-              error: `Language doesn't exist`,
-            })
-        })
-
-        it(`responds with 403 if language doesn't belong to user`, () => {
-          return endpoint.method(endpoint.path(testLanguage.id))
+        it(`responds with 404 if user doesn't have any languages`, () => {
+          return endpoint.method(endpoint.path)
             .set('Authorization', helpers.makeAuthHeader(testUsers[1]))
             .send({})
-            .expect(403, {
-              error: `That language doesn't belong to you! Silly!`,
+            .expect(404, {
+              error: `You don't have any languages`,
             })
         })
       })
@@ -74,26 +63,44 @@ describe('Language Endpoints', function () {
    * @description Get languages for a user
    **/
   describe(`GET /api/language`, () => {
-    const usersLanguages = testLanguages.filter(l => l.user_id === testUser.id)
+    const [usersLanguage] = testLanguages.filter(
+      lang => lang.user_id === testUser.id
+    )
+    const usersWords = testWords.filter(
+      word => word.language_id === usersLanguage.id
+    )
 
     beforeEach('insert users, languages and words', () => {
-      return helpers.seedUsersLanguagesWords(db, testUsers, testLanguages, testWords)
+      return helpers.seedUsersLanguagesWords(
+        db,
+        testUsers,
+        testLanguages,
+        testWords,
+      )
     })
 
-    it(`responds with 200 and user's languages`, () => {
+    it(`responds with 200 and user's language and words`, () => {
       return supertest(app)
         .get(`/api/language`)
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .expect(200)
         .expect(res => {
-          expect(res.body).to.have.length(usersLanguages.length)
+          expect(res.body).to.have.keys('language', 'words')
 
-          usersLanguages.forEach((usersLanguage, idx) => {
-            expect(res.body[idx]).to.have.property('id', usersLanguage.id)
-            expect(res.body[idx]).to.have.property('name', usersLanguage.name)
-            expect(res.body[idx]).to.have.property('user_id', usersLanguage.user_id)
-            expect(res.body[idx]).to.have.property('total_score', 0)
-            expect(res.body[idx]).to.have.property('head').which.is.not.null
+          expect(res.body.language).to.have.property('id', usersLanguage.id)
+          expect(res.body.language).to.have.property('name', usersLanguage.name)
+          expect(res.body.language).to.have.property('user_id', usersLanguage.user_id)
+          expect(res.body.language).to.have.property('total_score', 0)
+          expect(res.body.language).to.have.property('head')
+            .which.is.not.null
+
+          usersWords.forEach((usersWord, idx) => {
+            const word = res.body.words[idx]
+            expect(word).to.have.property('id', usersWord.id)
+            expect(word).to.have.property('original', usersWord.original)
+            expect(word).to.have.property('translation', usersWord.translation)
+            expect(word).to.have.property('memory_value', 1)
+            expect(word).to.have.property('score', 0)
           })
         })
     })
@@ -102,7 +109,7 @@ describe('Language Endpoints', function () {
   /**
    * @description Get head from language
    **/
-  describe(`GET /api/language/:language_id/head`, () => {
+  describe(`GET /api/language/head`, () => {
     const usersLanguage = testLanguages.find(l => l.user_id === testUser.id)
     const headWord = testWords.find(w => w.language_id === usersLanguage.id)
 
@@ -117,7 +124,7 @@ describe('Language Endpoints', function () {
 
     it(`responds with 200 and user's languages`, () => {
       return supertest(app)
-        .get(`/api/language/${usersLanguage.id}/head`)
+        .get(`/api/language/head`)
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .expect(200)
         .expect({
@@ -131,9 +138,11 @@ describe('Language Endpoints', function () {
   /**
    * @description Submit a new guess for the language
    **/
-  describe(`POST /api/language/:language_id/guess`, () => {
+  describe(`POST /api/language/guess`, () => {
     const [testLanguage] = testLanguages
-    const testLanguagesWords = testWords.filter(w => w.language_id === testLanguage.id)
+    const testLanguagesWords = testWords.filter(
+      w => w.language_id === testLanguage.id
+    )
 
     beforeEach('insert users, languages and words', () => {
       return helpers.seedUsersLanguagesWords(
@@ -150,7 +159,7 @@ describe('Language Endpoints', function () {
       }
 
       return supertest(app)
-        .post(`/api/language/${testLanguage.id}/guess`)
+        .post(`/api/language/guess`)
         .set('Authorization', helpers.makeAuthHeader(testUser))
         .send(postBody)
         .expect(400, {
@@ -165,7 +174,7 @@ describe('Language Endpoints', function () {
 
       it(`responds with incorrect and moves head`, () => {
         return supertest(app)
-          .post(`/api/language/${testLanguage.id}/guess`)
+          .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(incorrectPostBody)
           .expect(200)
@@ -180,12 +189,12 @@ describe('Language Endpoints', function () {
 
       it(`moves the word two spaces back and doesn't update score`, async () => {
         await supertest(app)
-          .post(`/api/language/${testLanguage.id}/guess`)
+          .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(incorrectPostBody)
 
         await supertest(app)
-          .post(`/api/language/${testLanguage.id}/guess`)
+          .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(incorrectPostBody)
           .expect({
@@ -206,7 +215,7 @@ describe('Language Endpoints', function () {
           guess: testLanguagesWords[0].translation,
         }
         return supertest(app)
-          .post(`/api/language/${testLanguage.id}/guess`)
+          .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(correctPostBody)
           .expect(200)
@@ -224,7 +233,7 @@ describe('Language Endpoints', function () {
           guess: testLanguagesWords[0].translation,
         }
         await supertest(app)
-          .post(`/api/language/${testLanguage.id}/guess`)
+          .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(correctPostBody)
 
@@ -232,7 +241,7 @@ describe('Language Endpoints', function () {
           guess: testLanguagesWords[1].translation,
         }
         await supertest(app)
-          .post(`/api/language/${testLanguage.id}/guess`)
+          .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(correctPostBody)
           .expect({
@@ -247,7 +256,7 @@ describe('Language Endpoints', function () {
           guess: testLanguagesWords[2].translation,
         }
         await supertest(app)
-          .post(`/api/language/${testLanguage.id}/guess`)
+          .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .send(correctPostBody)
           .expect({
