@@ -123,6 +123,7 @@ describe('Language Endpoints', function () {
         .expect({
           nextWord: headWord.original,
           languageTotalScore: 0,
+          wordScore: 0,
         })
     })
   })
@@ -171,12 +172,13 @@ describe('Language Endpoints', function () {
           .expect({
             nextWord: testLanguagesWords[1].original,
             languageTotalScore: 0,
+            wordScore: 0,
             answer: testLanguagesWords[0].translation,
             isCorrect: false
           })
       })
 
-      it(`moves the word two spaces back`, async () => {
+      it(`moves the word two spaces back and doesn't update score`, async () => {
         await supertest(app)
           .post(`/api/language/${testLanguage.id}/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
@@ -189,6 +191,7 @@ describe('Language Endpoints', function () {
           .expect({
             nextWord: testLanguagesWords[0].original,
             languageTotalScore: 0,
+            wordScore: 0,
             answer: testLanguagesWords[1].translation,
             isCorrect: false
           })
@@ -210,12 +213,13 @@ describe('Language Endpoints', function () {
           .expect({
             nextWord: testLanguagesWords[1].original,
             languageTotalScore: 1,
+            wordScore: 0,
             answer: testLanguagesWords[0].translation,
             isCorrect: true
           })
       })
 
-      it(`moves the word three spaces back`, async () => {
+      it(`moves the word three spaces back and increases score`, async () => {
         let correctPostBody = {
           guess: testLanguagesWords[0].translation,
         }
@@ -234,6 +238,7 @@ describe('Language Endpoints', function () {
           .expect({
             nextWord: testLanguagesWords[2].original,
             languageTotalScore: 2,
+            wordScore: 0,
             answer: testLanguagesWords[1].translation,
             isCorrect: true
           })
@@ -248,6 +253,7 @@ describe('Language Endpoints', function () {
           .expect({
             nextWord: testLanguagesWords[0].original,
             languageTotalScore: 3,
+            wordScore: 1,
             answer: testLanguagesWords[2].translation,
             isCorrect: true
           })

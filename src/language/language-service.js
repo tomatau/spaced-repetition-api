@@ -13,6 +13,7 @@ const LanguageService = {
       )
       .where('language.user_id', user_id)
   },
+
   getLanguageById(db, language_id) {
     return db
       .from('language')
@@ -37,6 +38,7 @@ const LanguageService = {
         'word.translation',
         'word.next',
         'word.memory_value',
+        'word.score',
         'language.total_score as language_total_score',
       )
       .leftJoin('language', 'language.head', 'word.id')
@@ -54,6 +56,7 @@ const LanguageService = {
         'translation',
         'next',
         'memory_value',
+        'score',
       )
       .where({ language_id })
   },
@@ -72,6 +75,7 @@ const LanguageService = {
       original: word.original,
       translation: word.translation,
       memory_value: word.memory_value,
+      score: word.score,
     })
 
     while (word.next) {
@@ -82,6 +86,7 @@ const LanguageService = {
         original: word.original,
         translation: word.translation,
         memory_value: word.memory_value,
+        score: word.score,
       })
     }
 
@@ -104,6 +109,7 @@ const LanguageService = {
             .where('id', node.value.id)
             .update({
               memory_value: node.value.memory_value,
+              score: node.value.score,
               next: node.next ? node.next.value.id : null,
             })
         )

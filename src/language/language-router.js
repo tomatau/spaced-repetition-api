@@ -59,6 +59,7 @@ languageRouter
 
       res.json({
         nextWord: word.original,
+        wordScore: word.score,
         languageTotalScore: word.language_total_score,
       })
     } catch (error) {
@@ -94,12 +95,16 @@ languageRouter
       let isCorrect
       if (guess === answer) {
         isCorrect = true
+
         linkedLanguage.head
           .value.memory_value = Number(node.value.memory_value) * 2
+
+        linkedLanguage.head.value.score = Number(linkedLanguage.head.value.score) + 1
 
         linkedLanguage.total_score = Number(linkedLanguage.total_score) + 1
       } else {
         isCorrect = false
+
         linkedLanguage.head.value.memory_value = 1
       }
 
@@ -112,6 +117,7 @@ languageRouter
 
       res.json({
         nextWord: linkedLanguage.head.value.original,
+        wordScore: linkedLanguage.head.value.score,
         languageTotalScore: linkedLanguage.total_score,
         answer,
         isCorrect,
