@@ -100,7 +100,8 @@ describe('Language Endpoints', function () {
             expect(word).to.have.property('original', usersWord.original)
             expect(word).to.have.property('translation', usersWord.translation)
             expect(word).to.have.property('memory_value', 1)
-            expect(word).to.have.property('score', 0)
+            expect(word).to.have.property('correct_count', 0)
+            expect(word).to.have.property('incorrect_count', 0)
           })
         })
     })
@@ -129,8 +130,9 @@ describe('Language Endpoints', function () {
         .expect(200)
         .expect({
           nextWord: headWord.original,
-          languageTotalScore: 0,
-          wordScore: 0,
+          totalScore: 0,
+          wordCorrectCount: 0,
+          wordIncorrectCount: 0,
         })
     })
   })
@@ -180,14 +182,15 @@ describe('Language Endpoints', function () {
           .expect(200)
           .expect({
             nextWord: testLanguagesWords[1].original,
-            languageTotalScore: 0,
-            wordScore: 0,
+            totalScore: 0,
+            wordCorrectCount: 0,
+            wordIncorrectCount: 0,
             answer: testLanguagesWords[0].translation,
             isCorrect: false
           })
       })
 
-      it(`moves the word two spaces back and doesn't update score`, async () => {
+      it(`moves the word 1 space and updates incorrect count`, async () => {
         await supertest(app)
           .post(`/api/language/guess`)
           .set('Authorization', helpers.makeAuthHeader(testUser))
@@ -199,8 +202,9 @@ describe('Language Endpoints', function () {
           .send(incorrectPostBody)
           .expect({
             nextWord: testLanguagesWords[0].original,
-            languageTotalScore: 0,
-            wordScore: 0,
+            totalScore: 0,
+            wordCorrectCount: 0,
+            wordIncorrectCount: 1,
             answer: testLanguagesWords[1].translation,
             isCorrect: false
           })
@@ -208,7 +212,9 @@ describe('Language Endpoints', function () {
     })
 
     context(`Given correct guess`, () => {
-      const testLanguagesWords = testWords.filter(w => w.language_id === testLanguage.id)
+      const testLanguagesWords = testWords.filter(
+        word => word.language_id === testLanguage.id
+      )
 
       it(`responds with correct and moves head`, () => {
         const correctPostBody = {
@@ -221,14 +227,15 @@ describe('Language Endpoints', function () {
           .expect(200)
           .expect({
             nextWord: testLanguagesWords[1].original,
-            languageTotalScore: 1,
-            wordScore: 0,
+            totalScore: 1,
+            wordCorrectCount: 0,
+            wordIncorrectCount: 0,
             answer: testLanguagesWords[0].translation,
             isCorrect: true
           })
       })
 
-      it(`moves the word three spaces back and increases score`, async () => {
+      it(`moves the word 2 spaces, increases score and correct count`, async () => {
         let correctPostBody = {
           guess: testLanguagesWords[0].translation,
         }
@@ -246,8 +253,9 @@ describe('Language Endpoints', function () {
           .send(correctPostBody)
           .expect({
             nextWord: testLanguagesWords[2].original,
-            languageTotalScore: 2,
-            wordScore: 0,
+            totalScore: 2,
+            wordCorrectCount: 0,
+            wordIncorrectCount: 0,
             answer: testLanguagesWords[1].translation,
             isCorrect: true
           })
@@ -261,8 +269,9 @@ describe('Language Endpoints', function () {
           .send(correctPostBody)
           .expect({
             nextWord: testLanguagesWords[0].original,
-            languageTotalScore: 3,
-            wordScore: 1,
+            totalScore: 3,
+            wordCorrectCount: 1,
+            wordIncorrectCount: 0,
             answer: testLanguagesWords[2].translation,
             isCorrect: true
           })

@@ -54,8 +54,9 @@ languageRouter
 
       res.json({
         nextWord: word.original,
-        wordScore: word.score,
-        languageTotalScore: word.language_total_score,
+        wordCorrectCount: word.correct_count,
+        wordIncorrectCount: word.incorrect_count,
+        totalScore: word.total_score,
       })
     } catch (error) {
       next(error)
@@ -91,13 +92,15 @@ languageRouter
 
         ll.head.value.memory_value = Number(node.value.memory_value) * 2
 
-        ll.head.value.score = Number(ll.head.value.score) + 1
+        ll.head.value.correct_count = Number(ll.head.value.correct_count) + 1
 
         ll.total_score = Number(ll.total_score) + 1
       } else {
         isCorrect = false
 
         ll.head.value.memory_value = 1
+
+        ll.head.value.incorrect_count = Number(ll.head.value.incorrect_count) + 1
       }
 
       ll.shiftHeadBy(ll.head.value.memory_value)
@@ -109,8 +112,9 @@ languageRouter
 
       res.json({
         nextWord: ll.head.value.original,
-        wordScore: ll.head.value.score,
-        languageTotalScore: ll.total_score,
+        wordCorrectCount: ll.head.value.correct_count,
+        wordIncorrectCount: ll.head.value.incorrect_count,
+        totalScore: ll.total_score,
         answer,
         isCorrect,
       })
