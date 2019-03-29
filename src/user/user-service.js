@@ -43,7 +43,7 @@ const UserService = {
   },
   populateUserWords(db, user_id) {
     return db.transaction(async trx => {
-      const [frenchListId] = await trx
+      const [languageId] = await trx
         .into('language')
         .insert([
           { name: 'French', user_id },
@@ -57,7 +57,7 @@ const UserService = {
         .select('last_value')
         .first()
 
-      const frenchListWords = [
+      const languageWords = [
         ['entraine toi', 'practice', 2],
         ['bonjour', 'hello', 3],
         ['maison', 'house', 4],
@@ -68,11 +68,11 @@ const UserService = {
         ['chat', 'cat', null],
       ]
 
-      const [frenchHeadId] = await trx
+      const [languageHeadId] = await trx
         .into('word')
         .insert(
-          frenchListWords.map(([original, translation, nextInc]) => ({
-            language_id: frenchListId.id,
+          languageWords.map(([original, translation, nextInc]) => ({
+            language_id: languageId.id,
             original,
             translation,
             next: nextInc
@@ -83,9 +83,9 @@ const UserService = {
         )
 
       await trx('language')
-        .where('id', frenchListId.id)
+        .where('id', languageId.id)
         .update({
-          head: frenchHeadId.id,
+          head: languageHeadId.id,
         })
     })
   },
