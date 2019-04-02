@@ -6,10 +6,10 @@ class Node {
 }
 
 class LinkedList {
-  constructor({ id, name, score }) {
+  constructor({ id, name, total_score }) {
     this.id = id
     this.name = name
-    this.score = score
+    this.total_score = total_score
     this.head = null
   }
 
